@@ -11,12 +11,13 @@ export const useTheme = () => {
 };
 
 const STORAGE_KEY = "pizzahub-theme";
-const DEFAULT_THEME = "light";
+const DEFAULT_THEME = "dark";
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored === "light" || stored === "dark" ? stored : DEFAULT_THEME;
+    // Force dark as the baseline; ignore any stale light value
+    return stored === "dark" ? "dark" : DEFAULT_THEME;
   });
 
   useEffect(() => {
@@ -25,7 +26,8 @@ export const ThemeProvider = ({ children }) => {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+    // Keep admin experience locked to dark mode
+    setTheme("dark");
   };
 
   const value = useMemo(() => ({ theme, toggleTheme, setTheme }), [theme]);

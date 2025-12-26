@@ -93,14 +93,16 @@ function Orders() {
   const updateOrderStatus = async (orderId, newStatus, previousStatus) => {
     setUpdatingOrderId(orderId);
 
-    // Optimistic update
+    // Optimistic update so the table changes immediately
     setOrders((prevOrders) =>
       prevOrders.map((o) =>
         o.id === orderId ? { ...o, status: newStatus } : o
       )
     );
     if (selectedOrder?.id === orderId) {
-      setSelectedOrder((prev) => ({ ...prev, status: newStatus }));
+      setSelectedOrder((prev) =>
+        prev ? { ...prev, status: newStatus } : prev
+      );
     }
 
     try {
@@ -110,7 +112,7 @@ function Orders() {
       });
 
       if (response.data.success) {
-        // Update with server response to be sure
+        // Update with server response to stay accurate
         setOrders((prevOrders) =>
           prevOrders.map((o) =>
             o.id === orderId
@@ -134,6 +136,9 @@ function Orders() {
           text: "Order status updated successfully",
         });
         setTimeout(() => setStatusMessage(null), 3000);
+
+        // Re-fetch to stay in sync with backend (revenue, counts, etc.)
+        fetchOrders();
       }
     } catch (error) {
       console.error("Failed to update order:", error);
